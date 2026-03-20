@@ -129,6 +129,22 @@ When `mdbook` builds or serves the book, this preprocessor:
 2. Scans each chapter for `{{ #asciinema ... }}` tags.
 3. Replaces each tag with the HTML and JavaScript needed to render an embedded asciinema-player.
 
+## Verifying Release Artifacts
+
+All release binaries include [build provenance attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds) and an [SBOM (Software Bill of Materials)](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds#about-sbom-attestations) in SPDX format.
+
+To verify the provenance of a downloaded binary:
+
+```sh
+gh attestation verify <artifact-file> --repo github/mdbook-asciinema
+```
+
+To verify the SBOM attestation:
+
+```sh
+gh attestation verify <artifact-file> --repo github/mdbook-asciinema --predicate-type https://spdx.dev/Document
+```
+
 ## License
 
 Licensed under the [MIT license](LICENSE).

@@ -4,7 +4,12 @@ name: Deploy
 on:
   push:
     tags:
-      - "*"
+      - "v*"
+
+permissions:
+  id-token: write
+  contents: write
+  attestations: write
 
 env:
   CRATE_NAME: mdbook-asciinema
@@ -111,6 +116,11 @@ jobs:
           tar czvf ../../stage/${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }} ${{ env.CRATE_NAME }}
           cd -
 
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: target/stage/${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }}
+
       - name: Post Setup | Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -131,6 +141,18 @@ jobs:
       - name: Setup | Artifacts
         uses: actions/download-artifact@v4
 
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          artifact-name: sbom-${{ github.ref_name }}.spdx.json
+          output-file: sbom-${{ github.ref_name }}.spdx.json
+
+      - name: Attest SBOM
+        uses: actions/attest-sbom@v2
+        with:
+          subject-path: ${{ env.CRATE_NAME }}-*/${{ env.CRATE_NAME }}-*
+          sbom-path: sbom-${{ github.ref_name }}.spdx.json
+
       - name: Setup | Release notes
         run: |
           git log -1 --pretty='%s' > RELEASE.md
@@ -138,7 +160,9 @@ jobs:
       - name: Build | Publish
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ env.CRATE_NAME }}-*/${{ env.CRATE_NAME }}-*
+          files: |
+            ${{ env.CRATE_NAME }}-*/${{ env.CRATE_NAME }}-*
+            sbom-${{ github.ref_name }}.spdx.json
           body_path: RELEASE.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
