@@ -20,7 +20,7 @@ An [`mdbook`](https://github.com/rust-lang/mdBook) preprocessor that embeds [`as
   To install the latest version committed to GitHub:
 
   ```sh
-  cargo install mdbook-asciinema --git https://github.com/s-samadi/mdbook-asciinema.git --locked
+  cargo install mdbook-asciinema --git https://github.com/github/mdbook-asciinema.git --locked
   ```
 
 ## Getting Started
