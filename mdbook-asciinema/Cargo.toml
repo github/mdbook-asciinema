@@ -4,6 +4,7 @@ description = "mdbook asciinema preprocessor"
 edition.workspace = true
 homepage.workspace = true
 repository.workspace = true
+readme.workspace = true
 license.workspace = true
 name = "mdbook-asciinema"
 
