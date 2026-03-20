@@ -199,16 +199,36 @@ impl Placeholder {
 
                 html.push_str(format!(r#"<div id="{element_id}"></div>"#).as_str());
 
-                html.push_str(format!(r#"<script>AsciinemaPlayer.create({{url: '{uri}'"#).as_str());
+                // Build the source argument (string or object depending on encoding/parser)
+                let has_encoding = props.contains_key("encoding");
+                let has_parser = props.contains_key("parser");
 
-                if let Some(encoding) = props.get("encoding") {
-                    html.push_str(format!(r#", encoding: '{encoding}'"#).as_str())
+                if has_encoding || has_parser {
+                    html.push_str(
+                        format!(r#"<script>AsciinemaPlayer.create({{url: '{uri}'"#).as_str(),
+                    );
+
+                    if let Some(encoding) = props.get("encoding") {
+                        html.push_str(format!(r#", encoding: '{encoding}'"#).as_str())
+                    }
+
+                    if let Some(parser) = props.get("parser") {
+                        html.push_str(format!(r#", parser: '{parser}'"#).as_str())
+                    }
+
+                    html.push_str(
+                        format!(r#"}}, document.getElementById('{element_id}')"#).as_str(),
+                    );
+                } else {
+                    html.push_str(
+                        format!(
+                            r#"<script>AsciinemaPlayer.create('{uri}', document.getElementById('{element_id}')"#
+                        )
+                        .as_str(),
+                    );
                 }
 
-                if let Some(parser) = props.get("parser") {
-                    html.push_str(format!(r#", parser: '{parser}'"#).as_str())
-                }
-
+                // Opts is the 3rd argument to AsciinemaPlayer.create()
                 if let Some(opts_path_txt) = props.get("opts") {
                     let opts_path = PathBuf::from(opts_path_txt);
 
@@ -233,12 +253,10 @@ impl Placeholder {
                     let opts_json = serde_json::to_string(opts)
                         .map_err(|_| anyhow!("opts cannot be serialized as json"))?;
 
-                    html.push_str(format!(", opts: {opts_json}").as_str());
+                    html.push_str(format!(", {opts_json}").as_str());
                 }
 
-                html.push_str(
-                    format!(r#"}}, document.getElementById('{element_id}'));</script>"#).as_str(),
-                );
+                html.push_str(");</script>");
 
                 Ok(html.to_string())
             }
