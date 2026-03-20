@@ -1,8 +1,8 @@
 [Latest Version]: https://img.shields.io/crates/v/mdbook-asciinema.svg
 [crates.io]: https://crates.io/crates/mdbook-asciinema
-[License]: https://img.shields.io/crates/l/mdbook-asciinema.svg
 
-# `mdbook-asciinema` &emsp; [![Latest Version]][crates.io] [![License]][crates.io]
+# `mdbook-asciinema` &emsp; [![Latest Version]][crates.io] [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/github/mdbook-asciinema/blob/main/LICENSE)
+
 
 An [`mdbook`](https://github.com/rust-lang/mdBook) preprocessor that embeds [`asciinema`](https://asciinema.org) terminal recordings directly into your book pages using the [asciinema-player](https://docs.asciinema.org/manual/player/).
 
