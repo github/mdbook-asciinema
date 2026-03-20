@@ -1,7 +1,7 @@
 mod types;
 
-use anyhow::anyhow;
 use crate::types::Asset;
+use anyhow::anyhow;
 use mdbook_preprocessor::book::{Book, Chapter};
 use mdbook_preprocessor::errors::Result;
 use mdbook_preprocessor::{Preprocessor, PreprocessorContext};
@@ -85,14 +85,14 @@ fn create_assets(ctx: &PreprocessorContext) -> Result<()> {
             }
         }
 
-        fs::write(&asset_path, asset_contents).map(|_| anyhow!("failed to create {asset_path:?}"))?;
+        fs::write(&asset_path, asset_contents)
+            .map(|_| anyhow!("failed to create {asset_path:?}"))?;
 
         info!("created {asset_path:?}");
     }
 
     Ok(())
 }
-
 
 impl TransformMarkdown for Chapter {
     fn transform(&mut self, ctx: &PreprocessorContext) {
@@ -101,9 +101,12 @@ impl TransformMarkdown for Chapter {
         let mut previous_end_index = 0;
         let mut replaced = String::new();
 
-        replaced.push_str(r#"<link rel="stylesheet" href="lib/asciinema-player/asciinema-player.css">"#);
+        replaced.push_str(
+            r#"<link rel="stylesheet" href="lib/asciinema-player/asciinema-player.css">"#,
+        );
         replaced.push_str("\n\n");
-        replaced.push_str(r#"<script src="lib/asciinema-player/asciinema-player.min.js"></script>"#);
+        replaced
+            .push_str(r#"<script src="lib/asciinema-player/asciinema-player.min.js"></script>"#);
         replaced.push_str("\n\n");
 
         for placeholder in find_placeholders(&self.content) {
@@ -128,7 +131,7 @@ impl TransformMarkdown for Chapter {
 
         replaced.push_str(&self.content[previous_end_index..]);
         self.content = replaced
-    }    
+    }
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -149,9 +152,7 @@ impl Placeholder {
     fn from_capture(cap: Captures) -> Option<Self> {
         let placeholder_type = match (cap.get(0), cap.get(1), cap.get(2)) {
             (_, Some(typ), Some(rest)) => {
-                let mut args = rest
-                    .as_str()
-                    .split_whitespace();
+                let mut args = rest.as_str().split_whitespace();
 
                 let uri_arg = args.next();
 
@@ -161,12 +162,7 @@ impl Placeholder {
                     .collect::<HashMap<String, String>>();
 
                 match (typ.as_str(), uri_arg) {
-                    ("asciinema", Some(uri)) => Some(
-                        PlaceholderType::Asciinema(
-                            uri.into(),
-                            props
-                        )
-                    ),
+                    ("asciinema", Some(uri)) => Some(PlaceholderType::Asciinema(uri.into(), props)),
                     _ => None,
                 }
             }
@@ -176,22 +172,14 @@ impl Placeholder {
             _ => None,
         };
 
-        placeholder_type
-            .and_then(
-                |placeholder_type| {
-                    cap
-                        .get(0)
-                        .map(
-                            |mat| 
-                            Self {
-                                start_index: mat.start(),
-                                end_index: mat.end(),
-                                placeholder_type,
-                                placeholder_text: mat.as_str().to_string(),
-                            }
-                        )
-                }
-            )
+        placeholder_type.and_then(|placeholder_type| {
+            cap.get(0).map(|mat| Self {
+                start_index: mat.start(),
+                end_index: mat.end(),
+                placeholder_type,
+                placeholder_text: mat.as_str().to_string(),
+            })
+        })
     }
 
     fn render(&self, from_path: &Path) -> Result<String> {
@@ -202,11 +190,15 @@ impl Placeholder {
                 let mut html = String::new();
                 let element_id = format!(
                     "cast-{}",
-                    rand::rng().sample_iter(&Alphanumeric).take(6).map(char::from).collect::<String>()
+                    rand::rng()
+                        .sample_iter(&Alphanumeric)
+                        .take(6)
+                        .map(char::from)
+                        .collect::<String>()
                 );
 
                 html.push_str(format!(r#"<div id="{element_id}"></div>"#).as_str());
-                
+
                 html.push_str(format!(r#"<script>AsciinemaPlayer.create({{url: '{uri}'"#).as_str());
 
                 if let Some(encoding) = props.get("encoding") {
@@ -221,19 +213,22 @@ impl Placeholder {
                     let opts_path = PathBuf::from(opts_path_txt);
 
                     if !opts_path.is_relative() {
-                        return Err(anyhow!("opts must be a relative path, from the 'src' directory"));
+                        return Err(anyhow!(
+                            "opts must be a relative path, from the 'src' directory"
+                        ));
                     }
 
                     let opts_full_path = from_path.join(opts_path);
 
-                    let opts_txt = fs::read_to_string(&opts_full_path).map_err(|_| anyhow!("{opts_full_path:?} is not readable"))?;
+                    let opts_txt = fs::read_to_string(&opts_full_path)
+                        .map_err(|_| anyhow!("{opts_full_path:?} is not readable"))?;
 
                     let opts = serde_json::from_str::<Value>(opts_txt.as_str())
                         .map_err(|_| anyhow!("{opts_full_path:?} is not a valid json file"))?;
 
-                    let opts = opts
-                        .as_object()
-                        .ok_or_else(|| anyhow!("{opts_full_path:?} should contain a single json object"))?;
+                    let opts = opts.as_object().ok_or_else(|| {
+                        anyhow!("{opts_full_path:?} should contain a single json object")
+                    })?;
 
                     let opts_json = serde_json::to_string(opts)
                         .map_err(|_| anyhow!("opts cannot be serialized as json"))?;
@@ -241,7 +236,9 @@ impl Placeholder {
                     html.push_str(format!(", opts: {opts_json}").as_str());
                 }
 
-                html.push_str(format!(r#"}}, document.getElementById('{element_id}'));</script>"#).as_str());
+                html.push_str(
+                    format!(r#"}}, document.getElementById('{element_id}'));</script>"#).as_str(),
+                );
 
                 Ok(html.to_string())
             }
@@ -264,19 +261,19 @@ impl<'a> Iterator for PlaceholderIter<'a> {
 }
 
 fn find_placeholders(contents: &str) -> PlaceholderIter<'_> {
-    static PLACEHOLDER : LazyLock<regex::Regex> = LazyLock::new(
-        || regex::Regex::new(
-                r"(?x)              # insignificant whitespace mode
+    static PLACEHOLDER: LazyLock<regex::Regex> = LazyLock::new(|| {
+        regex::Regex::new(
+            r"(?x)              # insignificant whitespace mode
                 \\\{\{\#.*\}\}      # match escaped link
                 |                   # or
                 \{\{\s*             # link opening parens and whitespace
                 \#([a-zA-Z0-9_]+)   # link type
                 \s+                 # separating whitespace
                 ([^}]+)             # link target path and space separated properties
-                \}\}                # link closing parens"            
-            )
-            .unwrap()
-        );
+                \}\}                # link closing parens",
+        )
+        .unwrap()
+    });
 
     PlaceholderIter(PLACEHOLDER.captures_iter(contents))
 }

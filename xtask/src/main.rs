@@ -1,22 +1,16 @@
 mod types;
 mod utils;
 
-use anyhow::{anyhow, Result};
+use crate::{types::*, utils::*};
+use anyhow::{Result, anyhow};
 use clap::Parser;
-use crate::{
-    types::*,
-    utils::*,
-};
 use tracing::{error, info};
 
 const LICENSE_HEADER: &str = r#"/* Licensed to Marcin Kulik under the Apache License, Version 2.0. */
 /* For license information please see https://github.com/asciinema/asciinema-player/blob/develop/LICENSE */
 "#;
 
-const ASCIINEMA_FILES: &[&str] = &[
-    "asciinema-player.css",
-    "asciinema-player.min.js",
-];
+const ASCIINEMA_FILES: &[&str] = &["asciinema-player.css", "asciinema-player.min.js"];
 
 fn main() {
     let cli = Cli::parse();
@@ -28,7 +22,7 @@ fn main() {
         .init();
 
     let result = match cli.command {
-        Command::Update { version } => update(version)
+        Command::Update { version } => update(version),
     };
 
     if let Err(err) = result {
@@ -37,11 +31,14 @@ fn main() {
     }
 }
 
-
 fn update(version: String) -> Result<()> {
     let release_url = match version.as_str() {
-        "latest" => "https://api.github.com/repos/asciinema/asciinema-player/releases/latest".to_string(),
-        _ => format!("https://api.github.com/repos/asciinema/asciinema-player/releases/tags/{version}")
+        "latest" => {
+            "https://api.github.com/repos/asciinema/asciinema-player/releases/latest".to_string()
+        }
+        _ => format!(
+            "https://api.github.com/repos/asciinema/asciinema-player/releases/tags/{version}"
+        ),
     };
 
     info!("fetch release information for asciinema - {version}");
@@ -56,7 +53,8 @@ fn update(version: String) -> Result<()> {
     for &asset_name in ASCIINEMA_FILES {
         let download_url = release.get_asset_download_url(asset_name)?;
         let file_path = format!("mdbook-asciinema/assets/{asset_name}");
-        fetch_and_save_binary(&download_url, &file_path).map_err(|_| anyhow!("unable to fetch asset"))?;
+        fetch_and_save_binary(&download_url, &file_path)
+            .map_err(|_| anyhow!("unable to fetch asset"))?;
     }
 
     Ok(())

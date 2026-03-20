@@ -1,12 +1,12 @@
 mod types;
 
-use anyhow::{anyhow, Result};
-use clap::Parser;
 use crate::types::*;
+use anyhow::{Result, anyhow};
+use clap::Parser;
 use mdbook_asciinema::PlaceholderPreprocessor;
 use mdbook_preprocessor::Preprocessor;
-use tracing::error;
 use std::io;
+use tracing::error;
 
 fn main() {
     let cli = Cli::parse();
@@ -32,7 +32,7 @@ fn supports(renderer: &str) -> Result<()> {
     match PlaceholderPreprocessor::new().supports_renderer(renderer) {
         Ok(true) => Ok(()),
         Ok(false) => Err(anyhow!("mdbook-asciinema does not support {renderer}")),
-        Err(err) => Err(err)
+        Err(err) => Err(err),
     }
 }
 

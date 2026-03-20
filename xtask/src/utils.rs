@@ -1,8 +1,8 @@
-use anyhow::{anyhow, Result};
 use crate::types::*;
-use std::iter::Iterator;
+use anyhow::{Result, anyhow};
 use std::fs::File;
 use std::io::{Write, copy};
+use std::iter::Iterator;
 use tracing::info;
 
 impl GitHubResponse for serde_json::Value {
@@ -15,23 +15,21 @@ impl GitHubResponse for serde_json::Value {
             .as_array()
             .ok_or_else(|| anyhow!("assets should be json array"))?
             .iter()
-            .find(
-                |&value| {
-                    let Some(asset) = value.as_object() else {
-                        return false;
-                    };
+            .find(|&value| {
+                let Some(asset) = value.as_object() else {
+                    return false;
+                };
 
-                    let Some(value_name) = asset.get("name") else {
-                        return false;
-                    };
+                let Some(value_name) = asset.get("name") else {
+                    return false;
+                };
 
-                    let Some(name) = value_name.as_str() else {
-                        return false;
-                    };
+                let Some(name) = value_name.as_str() else {
+                    return false;
+                };
 
-                    name == asset_name
-                }
-            )
+                name == asset_name
+            })
             .ok_or_else(|| anyhow!("{asset_name} is missing"))?
             .as_object()
             .ok_or_else(|| anyhow!("asset should be json object"))?
@@ -44,7 +42,10 @@ impl GitHubResponse for serde_json::Value {
     }
 }
 
-pub (crate) fn fetch_and_save_binary(url: &str, file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub(crate) fn fetch_and_save_binary(
+    url: &str,
+    file_path: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
     info!("download {url} to {file_path}");
     let mut response = ureq::get(url).call()?;
     let mut file = File::create(file_path)?;
