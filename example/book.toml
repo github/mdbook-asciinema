@@ -1,0 +1,6 @@
+[book]
+title = "mdbook-asciinema Example"
+
+[preprocessor.asciinema]
+
+

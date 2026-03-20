@@ -1,0 +1,20 @@
+[package]
+authors.workspace = true
+description = "mdbook asciinema preprocessor"
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+name = "mdbook-asciinema"
+
+[dependencies]
+anyhow.workspace = true
+clap = { workspace = true, features = ["cargo"] }
+mdbook-preprocessor.workspace = true
+rand.workspace = true
+regex.workspace = true
+rust-embed = { version = "8.11", features = ["interpolate-folder-path"] }
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

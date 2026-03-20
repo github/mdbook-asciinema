@@ -1,0 +1,9 @@
+{
+  "autoPlay": true,
+  "speed": 2,
+  "idleTimeLimit": 0.5,
+  "cols": 400,
+  "rows": 51,
+  "fit": false,
+  "terminalFontSize": "15px"
+}
