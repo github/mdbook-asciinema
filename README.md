@@ -1,9 +1,10 @@
 [Latest Version]: https://img.shields.io/crates/v/mdbook-asciinema.svg
 [crates.io]: https://crates.io/crates/mdbook-asciinema
+[License]: https://img.shields.io/crates/l/mdbook-asciinema.svg
 
-# `mdbook-asciinema` &emsp; [![Latest Version]][crates.io]
+# `mdbook-asciinema` &emsp; [![Latest Version]][crates.io] [![License]][crates.io]
 
-An [`asciinema`](https://asciinema.org) preprocessor for [`mdbook`](https://github.com/rust-lang/mdBook).
+An [`mdbook`](https://github.com/rust-lang/mdBook) preprocessor that embeds [`asciinema`](https://asciinema.org) terminal recordings directly into your book pages using the [asciinema-player](https://docs.asciinema.org/manual/player/).
 
 ## Installation
 
@@ -17,7 +18,7 @@ An [`asciinema`](https://asciinema.org) preprocessor for [`mdbook`](https://gith
   cargo install mdbook-asciinema --locked
   ```
 
-  The install the latest version committed to GitHub:
+  To install the latest version committed to GitHub:
 
   ```sh
   cargo install mdbook-asciinema --git https://github.com/s-samadi/mdbook-asciinema.git --locked
@@ -28,7 +29,7 @@ An [`asciinema`](https://asciinema.org) preprocessor for [`mdbook`](https://gith
 Create a new book.
 
 ```bash
-mdbook init --force --title "My Book"
+mdbook init --force --title <TITLE>
 ```
 
 Edit the `book.toml` file; add the `asciinema` preprocessor.
@@ -40,7 +41,7 @@ title = "My Book"
 + [preprocessor.asciinema]
 ```
 
-Download an asciicast file (i.e. [demo.cast](https://raw.githubusercontent.com/asciinema/asciinema/202d5c5761687b489451e9bb1a5fe9189b73e9d9/tests/casts/demo.cast)) into a path underneath `src`.
+Add your asciicast file/s into a path underneath `src`.
 
 ```
 PROJ_DIR
@@ -53,7 +54,7 @@ PROJ_DIR
         └── demo.cast
 ```
 
-Add a helper tag to a markdown file (i.e. chapter_1.md).
+Add a helper tag to a markdown file (e.g. `chapter_1.md`).
 
 ```md
 # Chapter 1
@@ -76,3 +77,58 @@ Preview the book by running [mdbook serve](https://rust-lang.github.io/mdBook/cl
  INFO Serving on: http://localhost:3000
  INFO Watching for changes...
 ```
+
+## Syntax
+
+The general form of the helper tag is:
+
+```md
+{{ #asciinema <path> [opts=<path>] [encoding=<value>] [parser=<value>] }}
+```
+
+| Parameter  | Required | Description |
+|------------|----------|-------------|
+| `path`     | Yes      | Relative path (from `src`) to a `.cast` asciicast file. |
+| `opts`     | No       | Relative path to a JSON file containing [player options](https://docs.asciinema.org/manual/player/options/). |
+| `encoding` | No       | Character encoding of the cast (e.g. `utf-8`). |
+| `parser`   | No       | Parser to use for the cast (e.g. `asciicast`). |
+
+### Player Options
+
+To customise playback, create a JSON file with [asciinema-player options](https://docs.asciinema.org/manual/player/options/) and reference it with the `opts` parameter:
+
+```json
+{
+  "autoPlay": true,
+  "speed": 2,
+  "idleTimeLimit": 0.5,
+  "cols": 400,
+  "rows": 51,
+  "fit": false,
+  "terminalFontSize": "15px"
+}
+```
+
+```md
+{{ #asciinema video/demo.cast opts=video/player-opts.json }}
+```
+
+### Escaping
+
+To display the helper tag literally without rendering it, prefix it with a backslash:
+
+```md
+\{{ #asciinema video/demo.cast }}
+```
+
+## How It Works
+
+When `mdbook` builds or serves the book, this preprocessor:
+
+1. Copies the bundled asciinema-player JavaScript and CSS assets into `src/lib/asciinema-player/`.
+2. Scans each chapter for `{{ #asciinema ... }}` tags.
+3. Replaces each tag with the HTML and JavaScript needed to render an embedded asciinema-player.
+
+## License
+
+Licensed under the [MIT license](LICENSE).
