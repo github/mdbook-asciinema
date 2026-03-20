@@ -117,12 +117,12 @@ jobs:
           cd -
 
       - name: Attest Build Provenance
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: target/stage/${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }}
 
       - name: Post Setup | Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }}
           path: target/stage/*
@@ -148,7 +148,7 @@ jobs:
           output-file: sbom-${{ github.ref_name }}.spdx.json
 
       - name: Attest SBOM
-        uses: actions/attest-sbom@v2
+        uses: actions/attest-sbom@v4
         with:
           subject-path: ${{ env.CRATE_NAME }}-*/${{ env.CRATE_NAME }}-*
           sbom-path: sbom-${{ github.ref_name }}.spdx.json
