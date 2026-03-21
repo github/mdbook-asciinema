@@ -33,11 +33,11 @@ mdbook init --force --title <TITLE>
 
 Edit the `book.toml` file; add the `asciinema` preprocessor.
 
-```diff
+```toml
 [book]
 title = "My Book"
 
-+ [preprocessor.asciinema]
+[preprocessor.asciinema]
 ```
 
 Add your asciicast file/s into a path underneath `src`.

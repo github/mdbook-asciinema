@@ -183,12 +183,18 @@ impl Placeholder {
     }
 
     fn render(&self, from_path: &Path) -> Result<String> {
+        static ELEMENT_ID: LazyLock<regex::Regex> = LazyLock::new(|| {
+            regex::Regex::new(r#"^[A-Za-z][\w\-:.]*"#)
+            .unwrap()
+        });
+        
         match self.placeholder_type {
             // omit the escape char
             PlaceholderType::Escaped => Ok(self.placeholder_text[1..].to_owned()),
             PlaceholderType::Asciinema(ref uri, ref props) => {
                 let mut html = String::new();
-                let element_id = format!(
+
+                let mut element_id = format!(
                     "cast-{}",
                     rand::rng()
                         .sample_iter(&Alphanumeric)
@@ -196,6 +202,10 @@ impl Placeholder {
                         .map(char::from)
                         .collect::<String>()
                 );
+
+                if let Some(value) = props.get("id") && ELEMENT_ID.is_match(value) {
+                    element_id = value.clone()
+                }
 
                 html.push_str(format!(r#"<div id="{element_id}"></div>"#).as_str());
 
@@ -282,13 +292,13 @@ fn find_placeholders(contents: &str) -> PlaceholderIter<'_> {
     static PLACEHOLDER: LazyLock<regex::Regex> = LazyLock::new(|| {
         regex::Regex::new(
             r"(?x)              # insignificant whitespace mode
-                \\\{\{\#.*\}\}      # match escaped link
-                |                   # or
-                \{\{\s*             # link opening parens and whitespace
-                \#([a-zA-Z0-9_]+)   # link type
-                \s+                 # separating whitespace
-                ([^}]+)             # link target path and space separated properties
-                \}\}                # link closing parens",
+            \\\{\{\#.*\}\}      # match escaped link
+            |                   # or
+            \{\{\s*             # link opening parens and whitespace
+            \#([a-zA-Z0-9_]+)   # link type
+            \s+                 # separating whitespace
+            ([^}]+)             # link target path and space separated properties
+            \}\}                # link closing parens",
         )
         .unwrap()
     });
