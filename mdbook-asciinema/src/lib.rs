@@ -183,8 +183,8 @@ impl Placeholder {
     }
 
     fn render(&self, from_path: &Path) -> Result<String> {
-        static ELEMENT_ID: LazyLock<regex::Regex> =
-            LazyLock::new(|| regex::Regex::new(r#"^[A-Za-z][\w\-:.]*"#).unwrap());
+        static SCOPE: LazyLock<regex::Regex> =
+            LazyLock::new(|| regex::Regex::new(r#"^[A-Za-z0-9]{5,10}$"#).unwrap());
 
         match self.placeholder_type {
             // omit the escape char
@@ -192,51 +192,32 @@ impl Placeholder {
             PlaceholderType::Asciinema(ref uri, ref props) => {
                 let mut html = String::new();
 
-                let mut element_id = format!(
-                    "cast-{}",
-                    rand::rng()
-                        .sample_iter(&Alphanumeric)
-                        .take(6)
-                        .map(char::from)
-                        .collect::<String>()
+                // references:
+                //   - https://learn.microsoft.com/en-us/aspnet/core/blazor/components/css-isolation?view=aspnetcore-10.0#css-isolation-bundling
+                //   - https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector
+
+                let maybe_scope = props.get("scope");
+
+                let scope = match maybe_scope {
+                    Some(value) if SCOPE.is_match(&value) => value.clone(),
+                    _ => {
+                        rand::rng()
+                            .sample_iter(&Alphanumeric)
+                            .take(10)
+                            .map(char::from)
+                            .collect::<String>()
+                    }
+                };
+
+                let css_scope = format!("b-{scope}");
+
+                html.push_str(format!(r#"<div {css_scope}></div>"#).as_str());
+                html.push_str(
+                    format!(
+                        r#"<script {css_scope}>const player_{scope} = AsciinemaPlayer.create('{uri}', document.querySelector('div[{css_scope}]')"#
+                    )
+                    .as_str(),
                 );
-
-                if let Some(value) = props.get("id")
-                    && ELEMENT_ID.is_match(value)
-                {
-                    element_id = value.clone()
-                }
-
-                html.push_str(format!(r#"<div id="{element_id}"></div>"#).as_str());
-
-                // Build the source argument (string or object depending on encoding/parser)
-                let has_encoding = props.contains_key("encoding");
-                let has_parser = props.contains_key("parser");
-
-                if has_encoding || has_parser {
-                    html.push_str(
-                        format!(r#"<script>AsciinemaPlayer.create({{url: '{uri}'"#).as_str(),
-                    );
-
-                    if let Some(encoding) = props.get("encoding") {
-                        html.push_str(format!(r#", encoding: '{encoding}'"#).as_str())
-                    }
-
-                    if let Some(parser) = props.get("parser") {
-                        html.push_str(format!(r#", parser: '{parser}'"#).as_str())
-                    }
-
-                    html.push_str(
-                        format!(r#"}}, document.getElementById('{element_id}')"#).as_str(),
-                    );
-                } else {
-                    html.push_str(
-                        format!(
-                            r#"<script>AsciinemaPlayer.create('{uri}', document.getElementById('{element_id}')"#
-                        )
-                        .as_str(),
-                    );
-                }
 
                 // Opts is the 3rd argument to AsciinemaPlayer.create()
                 if let Some(opts_path_txt) = props.get("opts") {

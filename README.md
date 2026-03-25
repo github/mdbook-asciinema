@@ -82,15 +82,14 @@ Preview the book by running [mdbook serve](https://rust-lang.github.io/mdBook/cl
 The general form of the helper tag is:
 
 ```md
-{{ #asciinema <path> [opts=<path>] [encoding=<value>] [parser=<value>] }}
+{{ #asciinema <path> [opts=<path>] [scope=<string>] }}
 ```
 
 | Parameter  | Required | Description |
 |------------|----------|-------------|
 | `path`     | Yes      | Relative path (from `src`) to a `.cast` asciicast file. |
 | `opts`     | No       | Relative path to a JSON file containing [player options](https://docs.asciinema.org/manual/player/options/). |
-| `encoding` | No       | Character encoding of the cast (e.g. `utf-8`). |
-| `parser`   | No       | Parser to use for the cast (e.g. `asciicast`). |
+| `scope`    | No       | Scope identifer to provide [control](https://docs.asciinema.org/manual/player/api/#control-inspection) of a specific asciinema player. The provided value should be an alphanumeric string of length between 5 and 10 characters. If this value is not provided or does not meet these restrictions, a random alphanumeric string 10 characters in length will be generated. Each asciinema player will be declared:<br /><br />`const player_{scope} = AsciinemaPlayer.create('{path}', document.querySelector('div[b-{scope}]'));`. |
 
 ### Player Options
 
