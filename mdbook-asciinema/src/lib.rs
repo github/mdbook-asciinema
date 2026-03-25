@@ -183,11 +183,9 @@ impl Placeholder {
     }
 
     fn render(&self, from_path: &Path) -> Result<String> {
-        static ELEMENT_ID: LazyLock<regex::Regex> = LazyLock::new(|| {
-            regex::Regex::new(r#"^[A-Za-z][\w\-:.]*"#)
-            .unwrap()
-        });
-        
+        static ELEMENT_ID: LazyLock<regex::Regex> =
+            LazyLock::new(|| regex::Regex::new(r#"^[A-Za-z][\w\-:.]*"#).unwrap());
+
         match self.placeholder_type {
             // omit the escape char
             PlaceholderType::Escaped => Ok(self.placeholder_text[1..].to_owned()),
@@ -203,7 +201,9 @@ impl Placeholder {
                         .collect::<String>()
                 );
 
-                if let Some(value) = props.get("id") && ELEMENT_ID.is_match(value) {
+                if let Some(value) = props.get("id")
+                    && ELEMENT_ID.is_match(value)
+                {
                     element_id = value.clone()
                 }
 
