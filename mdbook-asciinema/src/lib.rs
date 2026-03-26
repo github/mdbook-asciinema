@@ -199,7 +199,7 @@ impl Placeholder {
                 let maybe_scope = props.get("scope");
 
                 let scope = match maybe_scope {
-                    Some(value) if SCOPE.is_match(&value) => value.clone(),
+                    Some(value) if SCOPE.is_match(value) => value.clone(),
                     _ => rand::rng()
                         .sample_iter(&Alphanumeric)
                         .take(10)
