@@ -200,13 +200,11 @@ impl Placeholder {
 
                 let scope = match maybe_scope {
                     Some(value) if SCOPE.is_match(&value) => value.clone(),
-                    _ => {
-                        rand::rng()
-                            .sample_iter(&Alphanumeric)
-                            .take(10)
-                            .map(char::from)
-                            .collect::<String>()
-                    }
+                    _ => rand::rng()
+                        .sample_iter(&Alphanumeric)
+                        .take(10)
+                        .map(char::from)
+                        .collect::<String>(),
                 };
 
                 let css_scope = format!("b-{scope}");
