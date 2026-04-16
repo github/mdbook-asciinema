@@ -102,11 +102,11 @@ impl TransformMarkdown for Chapter {
         let mut replaced = String::new();
 
         replaced.push_str(
-            r#"<link rel="stylesheet" href="lib/asciinema-player/asciinema-player.css">"#,
+            r#"<link rel="stylesheet" href="/lib/asciinema-player/asciinema-player.css">"#,
         );
         replaced.push_str("\n\n");
         replaced
-            .push_str(r#"<script src="lib/asciinema-player/asciinema-player.min.js"></script>"#);
+            .push_str(r#"<script src="/lib/asciinema-player/asciinema-player.min.js"></script>"#);
         replaced.push_str("\n\n");
 
         for placeholder in find_placeholders(&self.content) {
